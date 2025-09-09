@@ -10,6 +10,9 @@ mkdir -p "/host${TMPDIRBASE}"
 TMPDIR=$(chroot /host /bin/sh -c "mktemp -d -p ${TMPDIRBASE}")
 
 cleanup() {
+    if [ -n $INSTALL_PID ] && kill -0 "${INSTALL_PID}" >/dev/null 2>&1; then
+        kill -TERM "${INSTALL_PID}" >/dev/null 2>&1
+    fi
     rm -rf "/host${TMPDIR}"
 }
 
@@ -53,4 +56,9 @@ if [ -s /host/etc/systemd/system/rancher-system-agent.env ]; then
     fi
   done
 fi
-chroot /host ${TMPDIR}/install.sh "$@"
+
+chroot /host ${TMPDIR}/install.sh "$@" &
+INSTALL_PID=$!
+# wait on the install script to free up trap handling
+# ref: https://www.gnu.org/software/bash/manual/html_node/Signals.html#Signals-1
+wait $INSTALL_PID
