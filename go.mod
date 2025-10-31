@@ -1,8 +1,6 @@
 module github.com/rancher/system-agent
 
-go 1.24.6
-
-toolchain go1.24.7
+go 1.24.9
 
 replace (
 	// replace those modules from go.opentelemetry.io to elimilate CVEs
